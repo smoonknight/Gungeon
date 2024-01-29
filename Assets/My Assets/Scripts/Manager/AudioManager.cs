@@ -54,6 +54,33 @@ public class AudioManager : Singleton<AudioManager>
         sound.source.Play();
     }
 
+    public void PitchModifier(string name, float pitch)
+    {
+        Sound sound = Array.Find(sounds, sound => sound.name == name);
+
+        if (sound == null)
+        {
+            return;
+        }
+
+        StartCoroutine(pitchSmootherModifier(sound.source, pitch));
+    }
+
+    IEnumerator pitchSmootherModifier(AudioSource source, float toPitch, float duration = 3f)
+    {
+        float currentPitch = source.pitch;
+        float elapsedTime = 0.1f;
+        while (elapsedTime < duration)
+        {
+            float modifierPitch = Mathf.Lerp(currentPitch, toPitch, elapsedTime / duration);
+            source.pitch = modifierPitch;
+            elapsedTime += Time.deltaTime;
+            yield return null;
+        }
+
+        source.pitch = toPitch;
+    }
+
     public void PlayOnShot(string name, bool isFaded = false)
     {
         Sound sound = Array.Find(sounds, sound => sound.name == name);

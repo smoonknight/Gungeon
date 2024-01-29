@@ -17,6 +17,6 @@ MonoBehaviour:
     health: 1500
     mana: 500
   currentPoint:
-    health: 1500
+    health: 0
     mana: 500
   skillCharacters: 

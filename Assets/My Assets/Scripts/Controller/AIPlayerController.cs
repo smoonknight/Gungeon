@@ -32,7 +32,6 @@ public class AIPlayerController : CharacterBattleController
 
         animator.SetFloat(velocityZHash, moveSpeed);
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        RaycastHit hit;
 
         Collider[] colliders = Physics.OverlapSphere(transform.position, sphereRadius, playerMask);
         if (colliders.Length == 0)

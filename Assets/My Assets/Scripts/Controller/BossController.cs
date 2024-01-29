@@ -20,6 +20,7 @@ public class BossController : MonoBehaviour, ITargetable, IDamageable
     public Transform targetObject;
     public NavMeshAgent agent;
     public GameObject minionPrefab;
+    public GameObject finalBossFase;
 
     Transform player;
     float lastSkill;
@@ -52,12 +53,21 @@ public class BossController : MonoBehaviour, ITargetable, IDamageable
         MinionSpawner();
         StartCoroutine(StartBoss());
         StartCoroutine(WaitingRage());
+        StartCoroutine(WaitingFinalRage());
+    }
+
+    IEnumerator WaitingFinalRage()
+    {
+        yield return new WaitUntil(() => characterData.currentPoint.health < 500);
+        AudioManager.Instance.PitchModifier("Music", 0.48f);
+        finalBossFase.SetActive(true);
     }
 
     IEnumerator WaitingRage()
     {
         yield return new WaitUntil(() => characterData.currentPoint.health < 1000);
         yield return new WaitUntil(() => agent.isActiveAndEnabled);
+        AudioManager.Instance.PitchModifier("Music", 0.7f);
         cooldownSkillModifier = 2f;
         bossAnimator.speed = 1.5f;
         agent.acceleration = 10;
@@ -133,10 +143,10 @@ public class BossController : MonoBehaviour, ITargetable, IDamageable
                     if (rageState)
                     {
                         StartCoroutine(ThrowRock());
-                        yield return new WaitUntil(() => Time.time < lastSkill + 1.5 == false);
+                        yield return new WaitUntil(() => Time.time < lastSkill + 1.0 == false);
                         lastSkill = Time.time;
                         StartCoroutine(ThrowRock());
-                        yield return new WaitUntil(() => Time.time < lastSkill + 1.5 == false);
+                        yield return new WaitUntil(() => Time.time < lastSkill + 1.0 == false);
                         lastSkill = Time.time;
                     }
                     yield return StartCoroutine(ThrowRock());
@@ -166,24 +176,28 @@ public class BossController : MonoBehaviour, ITargetable, IDamageable
     {
         bossAnimator.SetTrigger("Skill");
         yield return new WaitUntil(() => Time.time < lastSkill + 1 == false);
-        AddLastSkill(1);
+        AddLastSkill(1f);
 
         CameraShakeManager.Instance.StartShake(0.4f, 0.4f);
         GameObject rockPrefab = PropertyManager.Instance.GetPorperty(PropertyManager.PropertyType.rock);
-        ParticleManager.Instance.PlayParticleOnTime(ParticleManager.ParticleType.dust, transform.position);
+        ParticleManager.Instance.PlayParticleOnTime(ParticleManager.ParticleType.rocket, transform.position);
 
         Vector3 rockLocation = transform.position;
         GameObject rock = Instantiate(rockPrefab, rockLocation, Quaternion.identity);
-        Rigidbody rigidbodyRock = rock.GetComponent<Rigidbody>();
         AudioManager.Instance.PlayOnShot("Rock Yeet");
-        rigidbodyRock.velocity = Vector3.up * 25;
+        StartCoroutine(YeetRock(rock));
+    }
 
+    IEnumerator YeetRock(GameObject rock)
+    {
+        Rigidbody rigidbodyRock = rock.GetComponent<Rigidbody>();
+        rigidbodyRock.velocity = Vector3.up * 25;
         yield return new WaitUntil(() => rigidbodyRock.velocity.y < 0);
 
         Vector3 targetPosition = GetPlayerPosition();
         rock.transform.position = new Vector3(targetPosition.x, rock.transform.position.y, targetPosition.z);
 
-        rigidbodyRock.velocity = Vector3.down * 25;
+        rigidbodyRock.velocity = Vector3.down * (25 * cooldownSkillModifier);
 
         Destroy(rock.gameObject, 5f);
     }

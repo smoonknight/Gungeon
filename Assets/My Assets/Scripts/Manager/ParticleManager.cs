@@ -16,7 +16,7 @@ public class ParticleManager : Singleton<ParticleManager>
     {
         Particle particle = Array.Find(particles, prop => prop.particleType == type);
         
-        GameObject particleSpawn = Instantiate(particle.particlePrefab, location, Quaternion.identity);
+        GameObject particleSpawn = Instantiate(particle.particlePrefab, location, particle.particlePrefab.transform.rotation);
         
         Destroy(particleSpawn, particleSpawn.GetComponent<ParticleSystem>().main.duration);
     }
@@ -25,7 +25,7 @@ public class ParticleManager : Singleton<ParticleManager>
     {
         Particle particle = Array.Find(particles, prop => prop.particleType == type);
         
-        GameObject particleSpawn = Instantiate(particle.particlePrefab, location, Quaternion.identity);
+        GameObject particleSpawn = Instantiate(particle.particlePrefab, location, particle.particlePrefab.transform.rotation);
         
         Destroy(particleSpawn, duration);
     }
@@ -44,5 +44,6 @@ public class ParticleManager : Singleton<ParticleManager>
         plasma,
         explosion,
         fireball,
+        rocket
     }
 }
