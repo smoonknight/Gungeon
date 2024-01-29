@@ -6,7 +6,7 @@ using UnityEngine.AI;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 
-public class AIPlayerController : MovementController
+public class AIPlayerController : CharacterBattleController
 {
 
     public NavMeshAgent agent;

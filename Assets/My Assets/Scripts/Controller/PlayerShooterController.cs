@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
+[RequireComponent(typeof(PlayerInputController))]
 public class PlayerShooterControler : ShooterController
 {
     private PlayerInput playerInput;
@@ -8,23 +9,30 @@ public class PlayerShooterControler : ShooterController
     public GameObject bulletPrefab;
     public Transform bulletHole;
 
+    PlayerInputController playerInputController;
+
     void Awake()
     {
         playerInput = GetComponent<PlayerInput>();
         playerInputActions = new PlayerInputActions();
         playerInputActions.Player.Enable();
-        playerInputActions.Player.Shoot.performed += ctx => Shoot();
+        playerInputActions.Player.Shoot.performed += ctx => TakeShoot();
     }
 
-    void Shoot() {
-        GameObject peluru = Instantiate(bulletPrefab, bulletHole.position, bulletHole.rotation);
-
-        Rigidbody rbPeluru = peluru.GetComponent<Rigidbody>();
-        Vector3 direction = (target.position - bulletHole.position).normalized;
-
-        rbPeluru.velocity = direction * 25 ;
-        Destroy(peluru.gameObject, 3);
+    private void Start()
+    {
+        playerInputController = GetComponent<PlayerInputController>();
     }
+
+    void TakeShoot()
+    {
+        if (playerInputController.currentCharacterState == PlayerInputController.CharacterState.idle || playerInputController.currentCharacterState == PlayerInputController.CharacterState.running)
+        {
+            GameObject bullet = Instantiate(bulletPrefab, bulletHole.position, bulletHole.rotation);
+            Shoot(bullet, bulletHole);
+        }
+    }
+
 
 
 }

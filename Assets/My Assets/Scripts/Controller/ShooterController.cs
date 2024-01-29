@@ -13,6 +13,7 @@ public class ShooterController : MonoBehaviour
     [SerializeField] private LayerMask layerMask;
     public const float sphereRadius = 15f;
 
+
     private void Update()
     {
         CheckingTarget();
@@ -23,22 +24,33 @@ public class ShooterController : MonoBehaviour
         ITargetable targetable = null;
 
 
-        // Contoh: SphereCast untuk mengecek apakah titik checkPoint berada di dalam wilayah
         Collider[] colliders = Physics.OverlapSphere(shooter.position, sphereRadius, layerMask);
 
-        if (colliders.Length == 0)
-        {
-            target.position = baseTargetLocation.position;
-            return;
-        }
 
         foreach (var collider in colliders)
         {
             if (collider.gameObject.TryGetComponent(out targetable))
             {
-                target.position = targetable.TargetParent().position;
-                break;
+                if (!targetable.IsTargetable())
+                {
+                    continue;
+                }
+                target.position = targetable.TargetObject().position;
+                return;
             }
         }
+
+        target.position = baseTargetLocation.position;
+        return;
+    }
+
+    public void Shoot(GameObject bullet, Transform bulletSpawn)
+    {
+
+        AudioManager.Instance.PlayOnShot("Shot");
+        Rigidbody rbPeluru = bullet.GetComponent<Rigidbody>();
+        Vector3 direction = (target.position - bulletSpawn.position).normalized;
+        rbPeluru.velocity = direction * 25;
+        Destroy(bullet.gameObject, 3);
     }
 }
